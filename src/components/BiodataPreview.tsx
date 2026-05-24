@@ -2,9 +2,11 @@ import type { BiodataForm } from '../types/biodata'
 import type { CSSProperties, ReactNode } from 'react'
 import { getBackgroundImage } from '../data/backgrounds'
 import { PreviewRow } from './PreviewRow'
+import { useI18n } from '../i18n'
 
 type BiodataPreviewProps = {
   data: BiodataForm
+  compaction?: 'compact' | 'ultra-compact' | 'normal'
 }
 
 function fullName(data: BiodataForm) {
@@ -25,7 +27,10 @@ function sectionHasValues(values: Array<string>) {
   return values.some((value) => value.trim())
 }
 
-export function BiodataPreview({ data }: BiodataPreviewProps) {
+export function BiodataPreview({ data, compaction }: BiodataPreviewProps) {
+  const { t, lang } = useI18n()
+  const isRtl = lang === 'ur'
+
   const hasStarted = Boolean(
     fullName(data) ||
       data.personal.dob ||
@@ -52,7 +57,12 @@ export function BiodataPreview({ data }: BiodataPreviewProps) {
       id="biodata-preview"
       data-border-theme={data.design.borderTheme}
       data-background={data.design.background}
-      className="print-area relative mx-auto min-h-[297mm] w-full max-w-[210mm] overflow-hidden rounded-lg border-2 border-[#b88928] bg-[#fffaf0] text-stone-950 shadow-xl shadow-amber-950/10"
+      dir={isRtl ? 'rtl' : 'ltr'}
+      className={[
+        'print-area relative mx-auto overflow-hidden rounded-lg border-2 border-[#b88928] bg-[#fffaf0] text-stone-950 shadow-xl shadow-amber-950/10',
+        compaction === 'compact' ? 'export-compact' : '',
+        compaction === 'ultra-compact' ? 'export-ultra-compact' : '',
+      ].join(' ')}
       style={
         {
           '--text-panel-bg': `rgba(255, 250, 240, ${textPanelOpacity})`,
@@ -72,27 +82,27 @@ export function BiodataPreview({ data }: BiodataPreviewProps) {
 
       <div className="preview-title relative z-10 px-7 pb-3">
         <p className="inline-flex rounded-full border border-amber-200 bg-[#fffaf0]/80 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#8d5d13]">
-          Marriage Biodata
+          {t('marriageBiodata')}
         </p>
       </div>
 
       <div className="preview-hero relative z-10 grid gap-5 p-5 md:grid-cols-[1fr_132px]">
         <div>
-          <PreviewSection title="Personal Details">
-            <PreviewRow label="Name" value={name} />
-            <PreviewRow label="Date of Birth" value={data.personal.dob} />
-            <PreviewRow label="Gender" value={data.personal.gender} />
-            <PreviewRow label="Birth Place" value={data.personal.placeOfBirth} />
-            <PreviewRow label="Birth Time" value={birthTime(data)} />
-            <PreviewRow label="Height" value={data.personal.height} />
-            <PreviewRow label="Marital Status" value={data.personal.maritalStatus} />
-            <PreviewRow label="Religion" value={data.personal.religion} />
-            <PreviewRow label="Mother Tongue" value={data.personal.motherTongue} />
-            <PreviewRow label="Community" value={data.personal.community} />
-            <PreviewRow label="Diet" value={data.personal.diet} />
-            <PreviewRow label="Complexion" value={data.personal.complexion} />
+          <PreviewSection title={t('personalDetails')}>
+            <PreviewRow label={t('name')} value={name} />
+            <PreviewRow label={t('dob')} value={data.personal.dob} />
+            <PreviewRow label={t('gender')} value={data.personal.gender} />
+            <PreviewRow label={t('birthPlace')} value={data.personal.placeOfBirth} />
+            <PreviewRow label={t('birthTime')} value={birthTime(data)} />
+            <PreviewRow label={t('height')} value={data.personal.height} />
+            <PreviewRow label={t('maritalStatus')} value={data.personal.maritalStatus} />
+            <PreviewRow label={t('religion')} value={data.personal.religion} />
+            <PreviewRow label={t('motherTongue')} value={data.personal.motherTongue} />
+            <PreviewRow label={t('community')} value={data.personal.community} />
+            <PreviewRow label={t('diet')} value={data.personal.diet} />
+            <PreviewRow label={t('complexion')} value={data.personal.complexion} />
             <PreviewRow
-              label="Location"
+              label={t('location')}
               value={[data.personal.city, data.personal.state, data.personal.livingIn]
                 .filter(Boolean)
                 .join(', ')}
@@ -113,59 +123,59 @@ export function BiodataPreview({ data }: BiodataPreviewProps) {
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-gradient-to-b from-amber-50 to-stone-100 text-center text-sm font-medium text-amber-800">
-              Profile
+              {t('profile')}
               <br />
-              Photo
+              {t('photo')}
             </div>
           )}
         </div>
       </div>
 
       <div className="relative z-10 space-y-4 px-5 pb-5">
-        <PreviewSection title="Education & Career">
-          <PreviewRow label="Qualification" value={data.career.highestQualification} />
-          <PreviewRow label="College" value={data.career.collegeName} />
-          <PreviewRow label="Work Sector" value={data.career.workSector} />
-          <PreviewRow label="Occupation" value={data.career.occupation} />
-          <PreviewRow label="Company" value={data.career.companyName} />
-          <PreviewRow label="Annual Income" value={data.career.annualIncome} />
+        <PreviewSection title={t('educationCareer')}>
+          <PreviewRow label={t('qualification')} value={data.career.highestQualification} />
+          <PreviewRow label={t('college')} value={data.career.collegeName} />
+          <PreviewRow label={t('workSector')} value={data.career.workSector} />
+          <PreviewRow label={t('occupation')} value={data.career.occupation} />
+          <PreviewRow label={t('company')} value={data.career.companyName} />
+          <PreviewRow label={t('annualIncome')} value={data.career.annualIncome} />
         </PreviewSection>
 
         {sectionHasValues(familyValues) ? (
-          <PreviewSection title="Family Details">
-            <PreviewRow label="Father" value={data.family.fatherName} />
-            <PreviewRow label="Father's Work" value={data.family.fatherOccupation} />
-            <PreviewRow label="Mother" value={data.family.motherName} />
-            <PreviewRow label="Mother's Work" value={data.family.motherOccupation} />
-            <PreviewRow label="Siblings" value={data.family.siblings} />
+          <PreviewSection title={t('familyDetails')}>
+            <PreviewRow label={t('father')} value={data.family.fatherName} />
+            <PreviewRow label={t('fatherOccupation')} value={data.family.fatherOccupation} />
+            <PreviewRow label={t('mother')} value={data.family.motherName} />
+            <PreviewRow label={t('motherOccupation')} value={data.family.motherOccupation} />
+            <PreviewRow label={t('siblings')} value={data.family.siblings} />
           </PreviewSection>
         ) : null}
 
-        <PreviewSection title="Contact Information">
+        <PreviewSection title={t('contactInformation')}>
           <PreviewRow
-            label="Contact"
+            label={t('contact')}
             value={phone(data.contact.countryCode, data.contact.phone)}
           />
-          <PreviewRow label="Email" value={data.contact.email} />
+          <PreviewRow label={t('email')} value={data.contact.email} />
           <PreviewRow
-            label="Father Contact"
+            label={t('fatherContact')}
             value={phone(data.contact.fatherCountryCode, data.contact.fatherPhone)}
           />
           <PreviewRow
-            label="Mother Contact"
+            label={t('motherContact')}
             value={phone(data.contact.motherCountryCode, data.contact.motherPhone)}
           />
-          <PreviewRow label="Address" value={data.contact.address} />
+          <PreviewRow label={t('address')} value={data.contact.address} />
         </PreviewSection>
       </div>
 
       {!hasStarted ? (
         <div className="pointer-events-none absolute inset-x-8 top-[34%] z-10 rounded-lg border border-amber-200 bg-[#fffaf0]/88 px-5 py-4 text-center shadow-sm">
           <p className="font-serif text-2xl font-bold text-[#8d5d13]">
-            Your biodata preview will appear here
+            {t('previewPlaceholderTitle')}
           </p>
           <p className="mt-2 text-sm leading-6 text-stone-600">
-            Start with your name or use the sample data to preview a completed design.
+            {t('previewPlaceholderDesc')}
           </p>
         </div>
       ) : null}

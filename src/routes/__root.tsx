@@ -7,6 +7,7 @@ import {
   createRootRoute,
 } from '@tanstack/react-router'
 import appCss from '../styles.css?url'
+import { I18nProvider } from '../i18n'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -19,7 +20,7 @@ export const Route = createRootRoute({
       {
         name: 'description',
         content:
-          'Swayam — Where families begin. Create a polished marriage biodata with live preview, photo upload, and print-ready PDF export.',
+          'Swayam — Create a professional marriage biodata with live preview and PDF export.',
       },
     ],
     links: [{ rel: 'stylesheet', href: appCss }],
@@ -48,7 +49,9 @@ export const Route = createRootRoute({
 function RootComponent() {
   return (
     <RootDocument>
-      <Outlet />
+      <I18nProvider>
+        <Outlet />
+      </I18nProvider>
     </RootDocument>
   )
 }

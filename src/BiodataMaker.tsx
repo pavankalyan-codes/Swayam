@@ -1,9 +1,11 @@
 import * as Accordion from '@radix-ui/react-accordion'
 import { useForm } from '@tanstack/react-form'
-import { FileImage, FileText, Sparkles, RotateCcw } from 'lucide-react'
+import { FileImage, FileText, Sparkles, RotateCcw, Eye, X } from 'lucide-react'
 import { toJpeg } from 'html-to-image'
 import jsPDF from 'jspdf'
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import React, { useEffect, useMemo, useState, useRef, type ReactNode } from 'react'
+import { useI18n } from './i18n'
+import { LanguageSelector } from './components/LanguageSelector'
 import { AccordionSection } from './components/AccordionSection'
 import { BiodataPreview } from './components/BiodataPreview'
 import { FormInput } from './components/FormInput'
@@ -53,6 +55,10 @@ export function BiodataMaker() {
   const [errors, setErrors] = useState<FieldErrors>({})
   const [draftReady, setDraftReady] = useState(false)
   const [exporting, setExporting] = useState<'jpeg' | 'pdf' | null>(null)
+  const [compaction, setCompaction] = useState<'normal' | 'compact' | 'ultra-compact'>('normal')
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false)
+
+  const { t } = useI18n()
 
   const tanstackForm = useForm({
     defaultValues: formData,
@@ -69,6 +75,27 @@ export function BiodataMaker() {
   useEffect(() => {
     if (draftReady && typeof window !== 'undefined') {
       window.localStorage.setItem(draftKey, JSON.stringify(formData))
+    }
+
+    // Live calculation of content compaction to ensure the preview matches the export fit
+    const calculateCompaction = async () => {
+      const preview = document.getElementById('biodata-preview')
+      if (!preview) return
+
+      setCompaction('normal')
+      await nextFrame()
+      if (preview.scrollHeight <= 1123) return
+
+      setCompaction('compact')
+      await nextFrame()
+      if (preview.scrollHeight <= 1123) return
+
+      setCompaction('ultra-compact')
+    }
+
+    if (draftReady) {
+      const timer = setTimeout(calculateCompaction, 100)
+      return () => clearTimeout(timer)
     }
   }, [draftReady, formData])
 
@@ -197,50 +224,64 @@ export function BiodataMaker() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f8f4ec] text-stone-950">
+    <main className="min-h-screen bg-[#f8f4ec] text-stone-950 pb-24 xl:pb-0">
       <div className="mx-auto max-w-[1500px] px-4 py-6 sm:px-6 lg:px-8">
-        <header className="no-print mb-6 flex flex-col gap-4 border-b border-stone-200 pb-6 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-amber-700">
-            </p>
-            <h1 className="mt-2 text-3xl font-extrabold tracking-[0.02em] text-stone-950 sm:text-5xl brand-heading">
-              Swayam
+        <header className="no-print mb-6 flex flex-col gap-4 border-b border-stone-200 pb-6 lg:flex-row lg:items-end lg:justify-between animate-fade-in-up">
+          <div className="flex-1">
+            <div className="flex items-center gap-3">
+              <p className="text-xs font-bold uppercase tracking-[0.22em] text-amber-700 sm:text-sm">
+                {t('label')}
+              </p>
+              <div className="ml-auto">
+                <LanguageSelector />
+              </div>
+            </div>
+            <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-stone-950 sm:text-5xl brand-heading">
+              {t('swayam')}
             </h1>
-            <p className="mt-3 max-w-2xl brand-tagline">
-              Where families begin.
+            <p className="mt-3 max-w-2xl text-sm brand-tagline sm:text-base">
+              {t('tagline')}
             </p>
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3">
             <button
               type="button"
               onClick={resetForm}
-              className="inline-flex items-center gap-2 rounded-md border border-stone-300 bg-white px-4 py-2.5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
+              className="glossy-button-secondary inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-stone-800 transition-all hover:scale-[1.02] active:scale-95"
             >
               <RotateCcw className="h-4 w-4" />
-              Clear Form
+              {t('clearForm')}
             </button>
             <button
               type="button"
               onClick={useSampleData}
-              className="inline-flex items-center gap-2 rounded-md border border-amber-300 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-900 transition hover:bg-amber-100"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100 px-4 py-2.5 text-sm font-bold text-amber-900 shadow-sm transition-all hover:scale-[1.02] active:scale-95"
             >
               <Sparkles className="h-4 w-4" />
-              Try Sample
+              {t('trySample')}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsPreviewOpen(true)}
+              className="glossy-button-secondary inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-stone-800 transition-all hover:scale-[1.02] active:scale-95"
+            >
+              <Eye className="h-4 w-4" />
+              {t('preview')}
             </button>
             <button
               type="button"
               onClick={() => tanstackForm.handleSubmit()}
               disabled={Boolean(exporting)}
-              className="inline-flex items-center gap-2 rounded-md bg-stone-950 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="glossy-button-primary inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition-all hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <FileText className="h-4 w-4" />
-              {exporting === 'pdf' ? 'Saving PDF...' : 'Save as PDF'}
+              {exporting === 'pdf' ? 'Saving PDF...' : t('savePdf')}
             </button>
             <button
               type="button"
               onClick={exportJpeg}
               disabled={Boolean(exporting)}
-              className="inline-flex items-center gap-2 rounded-md border border-stone-300 bg-white px-4 py-2.5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="glossy-button-secondary inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-stone-800 transition-all hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <FileImage className="h-4 w-4" />
               {exporting === 'jpeg' ? 'Saving JPEG...' : 'Download JPEG'}
@@ -250,18 +291,18 @@ export function BiodataMaker() {
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,650px)_minmax(620px,1fr)]">
           <section className="no-print">
-            <div className="mb-4 rounded-lg border border-amber-200 bg-white px-4 py-3 shadow-sm">
+            <div className="glossy-surface mb-6 rounded-2xl border border-amber-200/50 p-5 shadow-xl animate-fade-in-up" style={{ animationDelay: '50ms' }}>
               <div className="flex items-center justify-between gap-4">
-                <p className="text-sm font-semibold text-stone-800">
-                  Required fields completed
+                <p className="text-sm font-black tracking-tight text-stone-800 uppercase">
+                  {t('requiredFieldsCompleted')}
                 </p>
-                <p className="text-sm font-bold text-amber-700">
-                  {filledRequiredCount}/{requiredTotal}
+                <p className="rounded-full bg-amber-600 px-3 py-1 text-[10px] font-black text-white shadow-lg shadow-amber-600/20">
+                  {Math.round((filledRequiredCount / requiredTotal) * 100)}%
                 </p>
               </div>
-              <div className="mt-3 h-2 overflow-hidden rounded-full bg-amber-100">
+              <div className="mt-4 h-3 overflow-hidden rounded-full bg-stone-200/50">
                 <div
-                  className="h-full rounded-full bg-amber-600 transition-all"
+                  className="progress-glow h-full rounded-full bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 transition-all duration-700 ease-out"
                   style={{ width: `${(filledRequiredCount / requiredTotal) * 100}%` }}
                 />
               </div>
@@ -286,17 +327,17 @@ export function BiodataMaker() {
                   'background',
                   'photo',
                 ]}
-                className="space-y-4"
+                className="space-y-4 accordion-stagger-container"
               >
                 <AccordionSection
                   value="personal"
-                  title="Personal Details"
-                  description="Core identity, birth, lifestyle, and location details."
+                  title={t('personalDetails')}
+                  description={t('personalDescription')}
                 >
                   <FieldGrid>
                     <FormInput
                       id="firstName"
-                      label="First Name"
+                      label={t('firstName')}
                       required
                       value={formData.personal.firstName}
                       error={errors['personal.firstName']}
@@ -304,7 +345,7 @@ export function BiodataMaker() {
                     />
                     <FormInput
                       id="lastName"
-                      label="Last Name"
+                      label={t('lastName')}
                       required
                       value={formData.personal.lastName}
                       error={errors['personal.lastName']}
@@ -312,7 +353,7 @@ export function BiodataMaker() {
                     />
                     <FormSelect
                       id="gender"
-                      label="Gender"
+                      label={t('gender')}
                       required
                       options={genderOptions}
                       value={formData.personal.gender}
@@ -322,7 +363,7 @@ export function BiodataMaker() {
                     <FormInput
                       id="dob"
                       type="date"
-                      label="Date of Birth"
+                      label={t('dob')}
                       required
                       value={formData.personal.dob}
                       error={errors['personal.dob']}
@@ -330,28 +371,28 @@ export function BiodataMaker() {
                     />
                     <FormInput
                       id="placeOfBirth"
-                      label="Place of Birth"
+                      label={t('placeOfBirth')}
                       value={formData.personal.placeOfBirth}
                       onChange={(value) => updateField('personal.placeOfBirth', value)}
                     />
                     <div className="grid grid-cols-3 gap-2">
                       <FormSelect
                         id="birthHour"
-                        label="Hour"
+                        label={t('hour')}
                         options={hourOptions}
                         value={formData.personal.timeOfBirth.hour}
                         onChange={(value) => updateField('personal.timeOfBirth.hour', value)}
                       />
                       <FormSelect
                         id="birthMinute"
-                        label="Minute"
+                        label={t('minute')}
                         options={minuteOptions}
                         value={formData.personal.timeOfBirth.minute}
                         onChange={(value) => updateField('personal.timeOfBirth.minute', value)}
                       />
                       <FormSelect
                         id="birthMeridiem"
-                        label="AM/PM"
+                        label={t('meridiem')}
                         options={meridiemOptions}
                         value={formData.personal.timeOfBirth.meridiem}
                         onChange={(value) => updateField('personal.timeOfBirth.meridiem', value)}
@@ -359,7 +400,7 @@ export function BiodataMaker() {
                     </div>
                     <FormInput
                       id="height"
-                      label="Height"
+                      label={t('height')}
                       required
                       placeholder="5 ft 8 in"
                       value={formData.personal.height}
@@ -368,7 +409,7 @@ export function BiodataMaker() {
                     />
                     <FormSelect
                       id="maritalStatus"
-                      label="Marital Status"
+                      label={t('maritalStatus')}
                       required
                       options={maritalStatusOptions}
                       value={formData.personal.maritalStatus}
@@ -377,7 +418,7 @@ export function BiodataMaker() {
                     />
                     <FormInput
                       id="religion"
-                      label="Religion"
+                      label={t('religion')}
                       required
                       value={formData.personal.religion}
                       error={errors['personal.religion']}
@@ -385,13 +426,13 @@ export function BiodataMaker() {
                     />
                     <FormInput
                       id="motherTongue"
-                      label="Mother Tongue"
+                      label={t('motherTongue')}
                       value={formData.personal.motherTongue}
                       onChange={(value) => updateField('personal.motherTongue', value)}
                     />
                     <FormInput
                       id="community"
-                      label="Community"
+                      label={t('community')}
                       required
                       value={formData.personal.community}
                       error={errors['personal.community']}
@@ -399,7 +440,7 @@ export function BiodataMaker() {
                     />
                     <FormSelect
                       id="diet"
-                      label="Diet"
+                      label={t('diet')}
                       required
                       options={dietOptions}
                       value={formData.personal.diet}
@@ -408,13 +449,13 @@ export function BiodataMaker() {
                     />
                     <FormInput
                       id="complexion"
-                      label="Complexion"
+                      label={t('complexion')}
                       value={formData.personal.complexion}
                       onChange={(value) => updateField('personal.complexion', value)}
                     />
                     <FormInput
                       id="livingIn"
-                      label="Living In"
+                      label={t('livingIn')}
                       required
                       value={formData.personal.livingIn}
                       error={errors['personal.livingIn']}
@@ -422,7 +463,7 @@ export function BiodataMaker() {
                     />
                     <FormInput
                       id="state"
-                      label="State / Province"
+                      label={t('state')}
                       required
                       value={formData.personal.state}
                       error={errors['personal.state']}
@@ -430,7 +471,7 @@ export function BiodataMaker() {
                     />
                     <FormInput
                       id="city"
-                      label="City"
+                      label={t('city')}
                       required
                       value={formData.personal.city}
                       error={errors['personal.city']}
@@ -441,13 +482,13 @@ export function BiodataMaker() {
 
                 <AccordionSection
                   value="career"
-                  title="Education & Career"
-                  description="Education, occupation, company, and income."
+                  title={t('educationCareer')}
+                  description={t('careerDescription')}
                 >
                   <FieldGrid>
                     <FormInput
                       id="highestQualification"
-                      label="Highest Qualification"
+                      label={t('qualification')}
                       required
                       value={formData.career.highestQualification}
                       error={errors['career.highestQualification']}
@@ -455,7 +496,7 @@ export function BiodataMaker() {
                     />
                     <FormInput
                       id="collegeName"
-                      label="College Name"
+                      label={t('college')}
                       required
                       value={formData.career.collegeName}
                       error={errors['career.collegeName']}
@@ -463,7 +504,7 @@ export function BiodataMaker() {
                     />
                     <FormSelect
                       id="workSector"
-                      label="Work Sector"
+                      label={t('workSector')}
                       required
                       options={workSectorOptions}
                       value={formData.career.workSector}
@@ -472,7 +513,7 @@ export function BiodataMaker() {
                     />
                     <FormInput
                       id="occupation"
-                      label="Job / Occupation"
+                      label={t('occupation')}
                       required
                       value={formData.career.occupation}
                       error={errors['career.occupation']}
@@ -480,7 +521,7 @@ export function BiodataMaker() {
                     />
                     <FormInput
                       id="companyName"
-                      label="Company Name"
+                      label={t('company')}
                       required
                       value={formData.career.companyName}
                       error={errors['career.companyName']}
@@ -488,7 +529,7 @@ export function BiodataMaker() {
                     />
                     <FormInput
                       id="annualIncome"
-                      label="Annual Income"
+                      label={t('annualIncome')}
                       required
                       value={formData.career.annualIncome}
                       error={errors['career.annualIncome']}
@@ -499,38 +540,38 @@ export function BiodataMaker() {
 
                 <AccordionSection
                   value="family"
-                  title="Family Details"
-                  description="Parents and sibling information for the biodata."
+                  title={t('familyDetails')}
+                  description={t('familyDescription')}
                 >
                   <FieldGrid>
                     <FormInput
                       id="fatherName"
-                      label="Father's Name"
+                      label={t('fatherName')}
                       value={formData.family.fatherName}
                       onChange={(value) => updateField('family.fatherName', value)}
                     />
                     <FormInput
                       id="fatherOccupation"
-                      label="Father's Occupation"
+                      label={t('fatherOccupation')}
                       value={formData.family.fatherOccupation}
                       onChange={(value) => updateField('family.fatherOccupation', value)}
                     />
                     <FormInput
                       id="motherName"
-                      label="Mother's Name"
+                      label={t('motherName')}
                       value={formData.family.motherName}
                       onChange={(value) => updateField('family.motherName', value)}
                     />
                     <FormInput
                       id="motherOccupation"
-                      label="Mother's Occupation"
+                      label={t('motherOccupation')}
                       value={formData.family.motherOccupation}
                       onChange={(value) => updateField('family.motherOccupation', value)}
                     />
                     <div className="sm:col-span-2">
                       <FormInput
                         id="siblings"
-                        label="Siblings"
+                        label={t('siblings')}
                         placeholder="Example: One elder sister, married"
                         value={formData.family.siblings}
                         onChange={(value) => updateField('family.siblings', value)}
@@ -541,13 +582,13 @@ export function BiodataMaker() {
 
                 <AccordionSection
                   value="contact"
-                  title="Contact Information"
-                  description="Phone, email, and address details for sharing."
+                  title={t('contactInformation')}
+                  description={t('contactDescription')}
                 >
                   <FieldGrid>
                     <PhoneInput
                       id="phone"
-                      label="Contact Number"
+                      label={t('contactNumber')}
                       required
                       countryCode={formData.contact.countryCode}
                       phone={formData.contact.phone}
@@ -558,7 +599,7 @@ export function BiodataMaker() {
                     <FormInput
                       id="email"
                       type="email"
-                      label="Email ID"
+                      label={t('emailId')}
                       required
                       value={formData.contact.email}
                       error={errors['contact.email']}
@@ -566,7 +607,7 @@ export function BiodataMaker() {
                     />
                     <PhoneInput
                       id="fatherPhone"
-                      label="Father's Contact Number"
+                      label={t('fatherContact')}
                       countryCode={formData.contact.fatherCountryCode}
                       phone={formData.contact.fatherPhone}
                       error={errors['contact.fatherPhone']}
@@ -577,7 +618,7 @@ export function BiodataMaker() {
                     />
                     <PhoneInput
                       id="motherPhone"
-                      label="Mother's Contact Number"
+                      label={t('motherContact')}
                       countryCode={formData.contact.motherCountryCode}
                       phone={formData.contact.motherPhone}
                       error={errors['contact.motherPhone']}
@@ -589,7 +630,7 @@ export function BiodataMaker() {
                     <div className="sm:col-span-2">
                       <FormInput
                         id="address"
-                        label="Address"
+                        label={t('address')}
                         multiline
                         value={formData.contact.address}
                         onChange={(value) => updateField('contact.address', value)}
@@ -597,15 +638,14 @@ export function BiodataMaker() {
                     </div>
                   </FieldGrid>
                   <p className="mt-4 rounded-md bg-stone-50 px-3 py-2 text-xs leading-5 text-stone-500">
-                    By entering your number, you agree to receive a WhatsApp message to
-                    help complete your biodata if you leave this page.
+                    {t('whatsappConsent')}
                   </p>
                 </AccordionSection>
 
                 <AccordionSection
                   value="background"
-                  title="Biodata Design"
-                  description="Choose the full-page template and photo corner style used in the preview and PDF."
+                  title={t('biodataDesign')}
+                  description={t('designDescription')}
                 >
                   <label className="mb-5 block rounded-lg border border-stone-200 bg-white p-4">
                     <span className="flex items-center justify-between gap-4">
@@ -675,9 +715,9 @@ export function BiodataMaker() {
                           aria-pressed={selected}
                           onClick={() => updateField('design.background', background.value)}
                           className={[
-                            'rounded-lg border p-3 text-left transition',
+                            'group relative rounded-xl border p-3 text-left transition-all hover:scale-[1.03] active:scale-95',
                             selected
-                              ? 'border-amber-600 bg-amber-50 shadow-sm'
+                              ? 'border-amber-500 bg-amber-50/50 shadow-md ring-2 ring-amber-500/20'
                               : 'border-stone-200 bg-white hover:border-amber-300',
                           ].join(' ')}
                         >
@@ -716,15 +756,135 @@ export function BiodataMaker() {
             </form>
           </section>
 
-          <aside className="xl:sticky xl:top-6 xl:self-start xl:max-h-[calc(100vh-5rem)] xl:overflow-y-auto">
-            <BiodataPreview data={formData} />
+          <aside className="xl:sticky xl:top-6 xl:self-start xl:max-h-[calc(100vh-5rem)] overflow-hidden animate-fade-in-up" style={{ animationDelay: '300ms' }}>
+            <div className="preview-container">
+              <PreviewScaler minScale={0.6}>
+                <BiodataPreview data={formData} compaction={compaction} />
+              </PreviewScaler>
+            </div>
           </aside>
         </div>
       </div>
+
+      {/* Mobile Sticky Navigation */}
+      <div className="no-print fixed bottom-0 left-0 right-0 z-50 border-t border-stone-200/50 p-4 glossy-surface xl:hidden">
+        <div className="mx-auto flex max-w-lg items-center gap-4">
+          <div className="flex-1">
+            <div className="mb-1.5 flex items-center justify-between">
+              <p className="text-[10px] font-black tracking-tight text-stone-800 uppercase">
+                Progress
+              </p>
+              <p className="text-[10px] font-black text-amber-700">
+                {Math.round((filledRequiredCount / requiredTotal) * 100)}%
+              </p>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-stone-200/50">
+              <div
+                className="progress-glow h-full rounded-full bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 transition-all duration-700 ease-out"
+                style={{ width: `${(filledRequiredCount / requiredTotal) * 100}%` }}
+              />
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setIsPreviewOpen(true)}
+              className="glossy-button-secondary inline-flex h-10 w-10 items-center justify-center rounded-xl transition-all active:scale-95"
+            >
+              <Eye className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => tanstackForm.handleSubmit()}
+              disabled={Boolean(exporting)}
+              className="glossy-button-primary inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <FileText className="h-4 w-4" />
+              {exporting === 'pdf' ? '...' : t('savePdf')}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Preview Modal Overlay */}
+      {isPreviewOpen && (
+        <div
+          className="no-print fixed inset-0 z-[100] flex items-center justify-center bg-stone-900/40 p-4 backdrop-blur-sm"
+          onClick={(e) => e.target === e.currentTarget && setIsPreviewOpen(false)}
+        >
+          <div className="animate-fade-in-up relative flex h-full max-h-[95vh] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-white/40 bg-[#f8f4ec] shadow-2xl">
+            <div className="sticky top-0 z-20 flex items-center justify-between border-b border-stone-200 bg-[#f8f4ec]/80 p-4 backdrop-blur-md">
+              <h2 className="text-xl font-black tracking-tight text-stone-900 uppercase">
+                {t('preview')}
+              </h2>
+              <button
+                onClick={() => setIsPreviewOpen(false)}
+                className="rounded-full bg-stone-200/50 p-2 text-stone-500 hover:bg-stone-200 hover:text-stone-900 transition-all active:scale-95"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 sm:p-10">
+              <div className="preview-container">
+                <PreviewScaler minScale={0.4}>
+                  <BiodataPreview data={formData} compaction={compaction} />
+                </PreviewScaler>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   )
 }
 
+/**
+ * Fits a fixed-width A4 preview (794px) into any container width using CSS scale.
+ * This prevents the preview from appearing "enlarged" on desktop or clipping on mobile.
+ */
+function PreviewScaler({ children, minScale = 0.5 }: { children: ReactNode; minScale?: number }) {
+  const [scale, setScale] = useState(1)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (!containerRef.current) return
+      const containerWidth = containerRef.current.offsetWidth
+      if (containerWidth <= 0) return
+
+      const fitScale = containerWidth / 794
+      const newScale = Math.max(minScale, Math.min(1, fitScale))
+      setScale(newScale)
+    }
+
+    // Ensure initial scale is correct after layout settles
+    const timer = setTimeout(handleResize, 100)
+
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      clearTimeout(timer)
+    }
+  }, [minScale])
+
+  return (
+    <div ref={containerRef} className="w-full flex justify-center overflow-x-visible">
+      <div 
+        style={{ 
+          transform: `scale(${scale})`, 
+          transformOrigin: 'top center',
+          width: '794px',
+          height: `${1123 * scale}px`, // Scale height container to match content
+          marginLeft: scale < 1 ? `calc((${scale} * 794px - 794px) / 2)` : 0,
+          marginRight: scale < 1 ? `calc((${scale} * 794px - 794px) / 2)` : 0,
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  )
+}
 function FieldGrid({ children }: { children: ReactNode }) {
   return <div className="grid gap-4 sm:grid-cols-2">{children}</div>
 }
