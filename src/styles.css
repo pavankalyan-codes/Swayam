@@ -1,0 +1,322 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Naskh+Arabic:wght@400;600;700&family=Noto+Sans+Bengali:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans+Gujarati:wght@400;600;700&family=Noto+Sans+Gurmukhi:wght@400;600;700&family=Noto+Sans+Kannada:wght@400;600;700&family=Noto+Sans+Malayalam:wght@400;600;700&family=Noto+Sans+Oriya:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Sans+Telugu:wght@400;600;700&display=swap');
+@import 'tailwindcss';
+
+:root {
+  color-scheme: light;
+  font-family:
+    Inter,
+    'Noto Sans Devanagari',
+    'Noto Sans Telugu',
+    'Noto Sans Tamil',
+    'Noto Sans Kannada',
+    'Noto Sans Malayalam',
+    'Noto Sans Bengali',
+    'Noto Sans Gujarati',
+    'Noto Sans Gurmukhi',
+    'Noto Sans Oriya',
+    'Noto Naskh Arabic',
+    system-ui,
+    sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: #f8f4ec;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.biodata-border-art,
+.border-curve,
+.divine-medallion {
+  pointer-events: none;
+  position: absolute;
+}
+
+.biodata-background-image {
+  inset: 0;
+  height: 100%;
+  opacity: 1;
+  object-fit: fill;
+  object-position: center;
+  pointer-events: none;
+  position: absolute;
+  width: 100%;
+  z-index: 0;
+}
+
+.preview-title {
+  padding-top: 96px;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.preview-section {
+  background: var(--text-panel-bg);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+.preview-row dt,
+.preview-row dd,
+.preview-section h3 {
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.print-area[data-background='none'] .preview-title {
+  padding-top: 28px;
+}
+
+.biodata-border-art {
+  inset: 0;
+  z-index: 20;
+}
+
+.border-curve {
+  display: none;
+  height: 74px;
+  width: 74px;
+  border-color: #d4a138;
+  opacity: 0.8;
+}
+
+.border-curve-tl {
+  left: 10px;
+  top: 10px;
+  border-left: 2px solid #d4a138;
+  border-top: 2px solid #d4a138;
+  border-top-left-radius: 44px;
+}
+
+.border-curve-tr {
+  right: 10px;
+  top: 10px;
+  border-right: 2px solid #d4a138;
+  border-top: 2px solid #d4a138;
+  border-top-right-radius: 44px;
+}
+
+.border-curve-bl {
+  bottom: 10px;
+  left: 10px;
+  border-bottom: 2px solid #d4a138;
+  border-left: 2px solid #d4a138;
+  border-bottom-left-radius: 44px;
+}
+
+.border-curve-br {
+  bottom: 10px;
+  right: 10px;
+  border-bottom: 2px solid #d4a138;
+  border-right: 2px solid #d4a138;
+  border-bottom-right-radius: 44px;
+}
+
+.divine-medallion {
+  display: none;
+  min-width: 74px;
+  max-width: 86px;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  border: 1px solid #d6a94f;
+  border-radius: 999px;
+  background: rgba(255, 250, 240, 0.78);
+  color: #8d5d13;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.1;
+  padding: 8px 7px;
+  text-align: center;
+  box-shadow: 0 0 0 3px rgba(214, 169, 79, 0.12);
+}
+
+.medallion-icon {
+  height: 24px;
+  width: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.medallion-a {
+  left: 12px;
+  top: 12px;
+}
+
+.medallion-b {
+  right: 12px;
+  top: 12px;
+}
+
+.medallion-c {
+  bottom: 18px;
+  left: 12px;
+}
+
+.medallion-d {
+  bottom: 18px;
+  right: 12px;
+}
+
+.print-area[data-border-theme='curved-gold'],
+.print-area[data-border-theme='christian-blessing'],
+.print-area[data-border-theme='hindu-divine'],
+.print-area[data-border-theme='all-blessings'] {
+  border-radius: 18px;
+}
+
+.print-area[data-border-theme='curved-gold'] .border-curve,
+.print-area[data-border-theme='christian-blessing'] .border-curve,
+.print-area[data-border-theme='hindu-divine'] .border-curve,
+.print-area[data-border-theme='all-blessings'] .border-curve {
+  display: block;
+}
+
+.print-area[data-border-theme='christian-blessing'] .medallion-a,
+.print-area[data-border-theme='hindu-divine'] .medallion-b,
+.print-area[data-border-theme='hindu-divine'] .medallion-c,
+.print-area[data-border-theme='hindu-divine'] .medallion-d,
+.print-area[data-border-theme='all-blessings'] .divine-medallion {
+  display: flex;
+}
+
+[data-border-theme-swatch='curved-gold'] {
+  border-radius: 18px;
+}
+
+[data-border-theme-swatch='christian-blessing'] {
+  background:
+    radial-gradient(circle at 50% 20%, rgba(141, 93, 19, 0.25) 0 10%, transparent 11%),
+    #fffaf0;
+}
+
+[data-border-theme-swatch='hindu-divine'] {
+  background:
+    radial-gradient(circle at 30% 25%, rgba(214, 169, 79, 0.34) 0 9%, transparent 10%),
+    radial-gradient(circle at 70% 75%, rgba(141, 93, 19, 0.22) 0 10%, transparent 11%),
+    #fffaf0;
+}
+
+[data-border-theme-swatch='all-blessings'] {
+  background:
+    radial-gradient(circle at 25% 25%, rgba(141, 93, 19, 0.24) 0 8%, transparent 9%),
+    radial-gradient(circle at 75% 25%, rgba(214, 169, 79, 0.3) 0 8%, transparent 9%),
+    radial-gradient(circle at 25% 75%, rgba(214, 169, 79, 0.3) 0 8%, transparent 9%),
+    radial-gradient(circle at 75% 75%, rgba(141, 93, 19, 0.24) 0 8%, transparent 9%),
+    #fffaf0;
+}
+
+@page {
+  size: A4;
+  margin: 0;
+}
+
+@media print {
+  html,
+  body {
+    width: auto;
+    min-height: auto;
+    background: white;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  main {
+    background: white !important;
+  }
+
+  main > div {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  main > div > div {
+    display: block !important;
+  }
+
+  aside {
+    position: static !important;
+  }
+
+  .print-area {
+    width: 210mm !important;
+    height: 297mm !important;
+    min-height: 297mm !important;
+    max-width: none !important;
+    border: 2px solid #b88928 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+  }
+
+  .print-area[data-border-theme='curved-gold'],
+  .print-area[data-border-theme='christian-blessing'],
+  .print-area[data-border-theme='hindu-divine'],
+  .print-area[data-border-theme='all-blessings'] {
+    border-radius: 0 !important;
+  }
+
+  .print-area .preview-hero {
+    display: grid !important;
+    grid-template-columns: 1fr 132px !important;
+    gap: 18px !important;
+    padding: 18px !important;
+  }
+
+  .print-area .preview-title {
+    padding-top: 88px !important;
+  }
+
+  .print-area[data-background='none'] .preview-title {
+    padding-top: 24px !important;
+  }
+
+  .print-area .preview-details {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    column-gap: 18px !important;
+  }
+
+  .print-area .preview-row {
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+  }
+
+  .print-area::after {
+    content: '';
+    position: fixed;
+    inset: 3mm;
+    border: 1px solid #d6a94f;
+    pointer-events: none;
+  }
+
+  .print-area h2 {
+    font-size: 26px !important;
+  }
+
+  .print-area h3 {
+    font-size: 16px !important;
+  }
+
+  .print-area dt {
+    font-size: 10px !important;
+  }
+
+  .print-area dd {
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+  }
+}
