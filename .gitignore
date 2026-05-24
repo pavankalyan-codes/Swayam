@@ -4,6 +4,7 @@ node_modules/
 # Build output
 dist/
 .tanstack/
+.netlify/
 
 # Logs
 *.log
@@ -28,3 +29,6 @@ Thumbs.db
 *.temp
 *-check.png
 *-debug.png
+
+# Local Netlify folder
+.netlify
