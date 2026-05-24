@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { BiodataMaker } from '../BiodataMaker'
 import { Sparkles, FileText, Languages, ShieldCheck, ArrowRight, Heart, Check, Palette, Download, Star } from 'lucide-react'
 import { useI18n } from '../i18n'
+import sampleBioImg from '../../Sample-bio/sample-generated-bio.jpg'
 
 export const Route = createFileRoute('/')({
   component: Home,
@@ -69,7 +70,7 @@ function Home() {
           <p className="text-[11px] font-bold text-stone-400 uppercase tracking-wider mb-4 text-center">Sample biodata preview</p>
           <div className="mx-auto bg-white rounded-xl border border-stone-200 overflow-hidden shadow-2xl transform transition-transform hover:scale-[1.02]">
             <img 
-              src="/Sample-bio/sample-generated-bio.jpg" 
+              src={sampleBioImg} 
               alt="Sample Marriage Biodata" 
               className="w-full h-auto block"
             />
