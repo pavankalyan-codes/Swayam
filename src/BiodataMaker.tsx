@@ -1,6 +1,6 @@
 import * as Accordion from '@radix-ui/react-accordion'
 import { useForm } from '@tanstack/react-form'
-import { FileImage, FileText, Sparkles, RotateCcw, Eye, X } from 'lucide-react'
+import { FileImage, FileText, Sparkles, RotateCcw, Eye, X, Share2 } from 'lucide-react'
 import { toJpeg } from 'html-to-image'
 import jsPDF from 'jspdf'
 import React, { useEffect, useMemo, useState, useRef, type ReactNode } from 'react'
@@ -177,7 +177,7 @@ export function BiodataMaker() {
         cacheBust: true,
         quality: 0.98,
         pixelRatio: 2,
-        backgroundColor: '#fffaf0',
+        backgroundColor: '#fcfdff',
         height: 1123,
         width: 794,
       })
@@ -198,6 +198,11 @@ export function BiodataMaker() {
       link.href = jpeg
       link.download = `${fileBaseName(data)}.jpg`
       link.click()
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('event', 'generate_biodata', {
+          method: 'jpeg',
+        })
+      }
     } finally {
       setExporting(null)
     }
@@ -218,6 +223,53 @@ export function BiodataMaker() {
       })
       pdf.addImage(jpeg, 'JPEG', 0, 0, 210, 297, undefined, 'FAST')
       pdf.save(`${fileBaseName(data)}.pdf`)
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('event', 'generate_biodata', {
+          method: 'pdf',
+        })
+      }
+    } finally {
+      setExporting(null)
+    }
+  }
+
+  async function sharePdf() {
+    setExporting('pdf')
+    try {
+      const data = await prepareExport()
+      if (!data) return
+
+      const jpeg = await capturePreview()
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+        compress: true,
+      })
+      pdf.addImage(jpeg, 'JPEG', 0, 0, 210, 297, undefined, 'FAST')
+
+      const pdfBlob = pdf.output('blob')
+      const fileName = `${fileBaseName(data)}.pdf`
+      const file = new File([pdfBlob], fileName, { type: 'application/pdf' })
+
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: t('marriageBiodata'),
+          text: t('tagline'),
+        })
+        if (typeof window !== 'undefined' && (window as any).gtag) {
+          (window as any).gtag('event', 'share_biodata', {
+            method: 'native_share',
+          })
+        }
+      } else {
+        alert('Sharing files is not supported on this browser. Try downloading the PDF instead.')
+      }
+    } catch (err) {
+      if (err instanceof Error && err.name !== 'AbortError') {
+        console.error('Error sharing PDF:', err)
+      }
     } finally {
       setExporting(null)
     }
@@ -229,7 +281,7 @@ export function BiodataMaker() {
         <header className="no-print mb-6 flex flex-col gap-4 border-b border-stone-200 pb-6 lg:flex-row lg:items-end lg:justify-between animate-fade-in-up">
           <div className="flex-1">
             <div className="flex items-center gap-3">
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-amber-700 sm:text-sm">
+              <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#9F1239] sm:text-sm">
                 {t('label')}
               </p>
               <div className="ml-auto">
@@ -255,10 +307,19 @@ export function BiodataMaker() {
             <button
               type="button"
               onClick={useSampleData}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100 px-4 py-2.5 text-sm font-bold text-amber-900 shadow-sm transition-all hover:scale-[1.02] active:scale-95"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-rose-200 bg-gradient-to-br from-rose-50 to-rose-100 px-4 py-2.5 text-sm font-bold text-rose-900 shadow-sm transition-all hover:scale-[1.02] active:scale-95"
             >
               <Sparkles className="h-4 w-4" />
               {t('trySample')}
+            </button>
+            <button
+              type="button"
+              onClick={sharePdf}
+              disabled={Boolean(exporting)}
+              className="glossy-button-secondary inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-stone-800 transition-all hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <Share2 className="h-4 w-4" />
+              {exporting === 'pdf' ? '...' : t('sharePdf')}
             </button>
             <button
               type="button"
@@ -291,18 +352,18 @@ export function BiodataMaker() {
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,650px)_minmax(620px,1fr)]">
           <section className="no-print">
-            <div className="glossy-surface mb-6 rounded-2xl border border-amber-200/50 p-5 shadow-xl animate-fade-in-up" style={{ animationDelay: '50ms' }}>
+            <div className="glossy-surface mb-6 rounded-2xl border border-rose-200/50 p-5 shadow-xl animate-fade-in-up" style={{ animationDelay: '50ms' }}>
               <div className="flex items-center justify-between gap-4">
                 <p className="text-sm font-black tracking-tight text-stone-800 uppercase">
                   {t('requiredFieldsCompleted')}
                 </p>
-                <p className="rounded-full bg-amber-600 px-3 py-1 text-[10px] font-black text-white shadow-lg shadow-amber-600/20">
+                <p className="rounded-full bg-[#9F1239] px-3 py-1 text-[10px] font-black text-white shadow-lg shadow-rose-600/20">
                   {Math.round((filledRequiredCount / requiredTotal) * 100)}%
                 </p>
               </div>
               <div className="mt-4 h-3 overflow-hidden rounded-full bg-stone-200/50">
                 <div
-                  className="progress-glow h-full rounded-full bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 transition-all duration-700 ease-out"
+                  className="progress-glow h-full rounded-full bg-gradient-to-r from-rose-500 via-[#9F1239] to-rose-700 transition-all duration-700 ease-out"
                   style={{ width: `${(filledRequiredCount / requiredTotal) * 100}%` }}
                 />
               </div>
@@ -657,7 +718,7 @@ export function BiodataMaker() {
                           Adjust how rounded the profile photo border should be.
                         </span>
                       </span>
-                      <span className="text-sm font-bold text-amber-700">
+                      <span className="text-sm font-bold text-[#9F1239]">
                         {formData.design.photoRadius || '18'}px
                       </span>
                     </span>
@@ -670,7 +731,7 @@ export function BiodataMaker() {
                       onChange={(event) =>
                         updateField('design.photoRadius', event.target.value)
                       }
-                      className="mt-4 w-full accent-amber-600"
+                      className="mt-4 w-full accent-[#534AB7]"
                     />
                   </label>
 
@@ -684,7 +745,7 @@ export function BiodataMaker() {
                           Add a soft panel behind details when the template is busy.
                         </span>
                       </span>
-                      <span className="text-sm font-bold text-amber-700">
+                      <span className="text-sm font-bold text-[#9F1239]">
                         {formData.design.textPanelOpacity || '36'}%
                       </span>
                     </span>
@@ -697,7 +758,7 @@ export function BiodataMaker() {
                       onChange={(event) =>
                         updateField('design.textPanelOpacity', event.target.value)
                       }
-                      className="mt-4 w-full accent-amber-600"
+                      className="mt-4 w-full accent-[#534AB7]"
                     />
                   </label>
 
@@ -717,12 +778,12 @@ export function BiodataMaker() {
                           className={[
                             'group relative rounded-xl border p-3 text-left transition-all hover:scale-[1.03] active:scale-95',
                             selected
-                              ? 'border-amber-500 bg-amber-50/50 shadow-md ring-2 ring-amber-500/20'
-                              : 'border-stone-200 bg-white hover:border-amber-300',
+                              ? 'border-rose-500 bg-rose-50/50 shadow-md ring-2 ring-rose-500/20'
+                              : 'border-stone-200 bg-white hover:border-rose-300',
                           ].join(' ')}
                         >
                           <span
-                            className="block aspect-[3/4] w-full overflow-hidden rounded-md border border-amber-200 bg-[#fffaf0] bg-contain bg-center bg-no-repeat"
+                            className="block aspect-[3/4] w-full overflow-hidden rounded-md border border-rose-200 bg-rose-50/30 bg-contain bg-center bg-no-repeat"
                             style={{
                               backgroundImage: background.image
                                 ? `url(${background.image})`
@@ -774,13 +835,13 @@ export function BiodataMaker() {
               <p className="text-[10px] font-black tracking-tight text-stone-800 uppercase">
                 Progress
               </p>
-              <p className="text-[10px] font-black text-amber-700">
+              <p className="text-[10px] font-black text-rose-700">
                 {Math.round((filledRequiredCount / requiredTotal) * 100)}%
               </p>
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-stone-200/50">
               <div
-                className="progress-glow h-full rounded-full bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 transition-all duration-700 ease-out"
+                className="progress-glow h-full rounded-full bg-gradient-to-r from-rose-500 via-[#9F1239] to-rose-700 transition-all duration-700 ease-out"
                 style={{ width: `${(filledRequiredCount / requiredTotal) * 100}%` }}
               />
             </div>

@@ -59,13 +59,13 @@ export function BiodataPreview({ data, compaction }: BiodataPreviewProps) {
       data-background={data.design.background}
       dir={isRtl ? 'rtl' : 'ltr'}
       className={[
-        'print-area relative mx-auto overflow-hidden rounded-lg border-2 border-[#b88928] bg-[#fffaf0] text-stone-950 shadow-xl shadow-amber-950/10',
+        'print-area relative mx-auto overflow-hidden rounded-lg border-2 border-[#9F1239] bg-[#fcfdff] text-stone-950 shadow-xl shadow-rose-950/10',
         compaction === 'compact' ? 'export-compact' : '',
         compaction === 'ultra-compact' ? 'export-ultra-compact' : '',
       ].join(' ')}
       style={
         {
-          '--text-panel-bg': `rgba(255, 250, 240, ${textPanelOpacity})`,
+          '--text-panel-bg': `rgba(252, 253, 255, ${textPanelOpacity})`,
         } as CSSProperties
       }
     >
@@ -81,7 +81,7 @@ export function BiodataPreview({ data, compaction }: BiodataPreviewProps) {
       <BorderDecorations />
 
       <div className="preview-title relative z-10 px-7 pb-3">
-        <p className="inline-flex rounded-full border border-amber-200 bg-[#fffaf0]/80 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#8d5d13]">
+        <p className="inline-flex rounded-full border border-rose-200 bg-white/80 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#9F1239]">
           {t('marriageBiodata')}
         </p>
       </div>
@@ -111,7 +111,7 @@ export function BiodataPreview({ data, compaction }: BiodataPreviewProps) {
         </div>
 
         <div
-          className="photo-frame mx-auto h-[166px] w-[132px] overflow-hidden border-4 border-amber-200 bg-white shadow-md"
+          className="photo-frame mx-auto h-[166px] w-[132px] overflow-hidden border-4 border-rose-200 bg-white shadow-md"
           style={{ borderRadius: `${data.design.photoRadius || '18'}px` }}
         >
           {data.photo ? (
@@ -122,7 +122,7 @@ export function BiodataPreview({ data, compaction }: BiodataPreviewProps) {
               className="h-full w-full object-cover"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-b from-amber-50 to-stone-100 text-center text-sm font-medium text-amber-800">
+            <div className="flex h-full w-full items-center justify-center bg-gradient-to-b from-rose-50 to-stone-100 text-center text-sm font-medium text-rose-800">
               {t('profile')}
               <br />
               {t('photo')}
@@ -170,8 +170,8 @@ export function BiodataPreview({ data, compaction }: BiodataPreviewProps) {
       </div>
 
       {!hasStarted ? (
-        <div className="pointer-events-none absolute inset-x-8 top-[34%] z-10 rounded-lg border border-amber-200 bg-[#fffaf0]/88 px-5 py-4 text-center shadow-sm">
-          <p className="font-serif text-2xl font-bold text-[#8d5d13]">
+        <div className="pointer-events-none absolute inset-x-8 top-[34%] z-10 rounded-lg border border-rose-200 bg-white/88 px-5 py-4 text-center shadow-sm">
+          <p className="font-serif text-2xl font-bold text-[#9F1239]">
             {t('previewPlaceholderTitle')}
           </p>
           <p className="mt-2 text-sm leading-6 text-stone-600">
@@ -268,7 +268,7 @@ function PreviewSection({
 }) {
   return (
     <section className="preview-section break-inside-avoid rounded-md p-2">
-      <h3 className="mb-2 border-b-2 border-amber-300 pb-1.5 font-serif text-lg font-bold text-[#8d5d13]">
+      <h3 className="mb-2 border-b-2 border-rose-300 pb-1.5 font-serif text-lg font-bold text-[#9F1239]">
         {title}
       </h3>
       <dl className="preview-details grid grid-cols-1 gap-x-5 sm:grid-cols-2">

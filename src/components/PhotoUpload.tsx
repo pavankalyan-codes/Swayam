@@ -33,13 +33,13 @@ export function PhotoUpload({ photo, onPhotoChange }: PhotoUploadProps) {
   }
 
   return (
-    <div className="rounded-lg border border-dashed border-amber-300 bg-amber-50/60 p-4">
+    <div className="rounded-lg border border-dashed border-rose-300 bg-rose-50/60 p-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <div className="flex h-24 w-20 items-center justify-center overflow-hidden rounded-md border border-amber-200 bg-white">
+        <div className="flex h-24 w-20 items-center justify-center overflow-hidden rounded-md border border-rose-200 bg-white">
           {photo ? (
             <img src={photo} alt="Uploaded profile" className="h-full w-full object-cover" />
           ) : (
-            <ImagePlus className="h-7 w-7 text-amber-600" />
+            <ImagePlus className="h-7 w-7 text-rose-600" />
           )}
         </div>
         <div className="flex-1">

@@ -25,7 +25,7 @@ export function FormInput({
 }: FormInputProps) {
   const inputClass = cn(
     'mt-2 w-full rounded-md border bg-white px-3 py-2.5 text-sm text-stone-950 outline-none transition',
-    'placeholder:text-stone-400 focus:border-amber-500 focus:ring-4 focus:ring-amber-100',
+    'placeholder:text-stone-400 focus:border-rose-500 focus:ring-4 focus:ring-rose-100',
     error ? 'border-red-400' : 'border-stone-200',
   )
 

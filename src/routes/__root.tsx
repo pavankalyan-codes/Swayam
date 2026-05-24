@@ -15,13 +15,25 @@ export const Route = createRootRoute({
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       {
-        title: 'Swayam',
+        title: 'Swayam — Free Marriage Biodata Maker with PDF Export',
       },
       {
         name: 'description',
         content:
-          'Swayam — Create a professional marriage biodata with live preview and PDF export.',
+          'Create a professional marriage biodata for free in minutes. Supports Hindi, Telugu, Tamil, and more. Live preview, photo upload, and instant PDF/JPEG download.',
       },
+      {
+        name: 'keywords',
+        content: 'marriage biodata maker, matrimonial biodata, free biodata creator, indian marriage biodata, biodata pdf download, marriage biodata format',
+      },
+      { property: 'og:title', content: 'Swayam — Free Marriage Biodata Maker' },
+      {
+        property: 'og:description',
+        content: 'Build a beautiful marriage biodata in multiple Indian languages for free.',
+      },
+      { property: 'og:type', content: 'website' },
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'robots', content: 'index, follow' },
     ],
     links: [{ rel: 'stylesheet', href: appCss }],
   }),
@@ -61,6 +73,18 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
     <html lang="en">
       <head>
         <HeadContent />
+        {/* Google Analytics */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-LSB9JW41WG"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-LSB9JW41WG');
+            `,
+          }}
+        />
       </head>
       <body>
         {children}
