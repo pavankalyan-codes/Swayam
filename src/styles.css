@@ -123,8 +123,19 @@ button,
 /* Make long script text wrap nicely in preview */
 .preview-row dd,
 .preview-row dt {
+  min-width: 0;
+  overflow-wrap: anywhere;
   word-break: break-word;
   white-space: normal;
+}
+
+.preview-details,
+.preview-row {
+  min-width: 0;
+}
+
+.preview-details-single {
+  grid-template-columns: minmax(0, 1fr) !important;
 }
 
 .brand-heading {
@@ -206,6 +217,10 @@ button,
   column-gap: 18px !important;
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.print-area.export-canvas .preview-details-single {
+  grid-template-columns: minmax(0, 1fr) !important;
 }
 
 .print-area.export-canvas .preview-row {
@@ -296,6 +311,10 @@ button,
 
 .print-area.export-ultra-compact .preview-details {
   column-gap: 10px !important;
+}
+
+.print-area.export-ultra-compact .preview-details-single {
+  grid-template-columns: minmax(0, 1fr) !important;
 }
 
 .print-area.export-ultra-compact .space-y-4 {
@@ -552,6 +571,10 @@ button,
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     column-gap: 18px !important;
+  }
+
+  .print-area .preview-details-single {
+    grid-template-columns: minmax(0, 1fr) !important;
   }
 
   .print-area .preview-row {

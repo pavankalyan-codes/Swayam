@@ -10,6 +10,7 @@ type FormInputProps = {
   type?: string
   placeholder?: string
   multiline?: boolean
+  className?: string
 }
 
 export function FormInput({
@@ -22,6 +23,7 @@ export function FormInput({
   type = 'text',
   placeholder,
   multiline,
+  className,
 }: FormInputProps) {
   const inputClass = cn(
     'mt-2 w-full rounded-md border bg-white px-3 py-2.5 text-sm text-stone-950 outline-none transition',
@@ -30,7 +32,7 @@ export function FormInput({
   )
 
   return (
-    <label htmlFor={id} className="block text-sm font-medium text-stone-700">
+    <label htmlFor={id} className={cn('block text-sm font-medium text-stone-700', className)}>
       {label}
       {required ? <span className="text-red-500"> *</span> : null}
       {multiline ? (

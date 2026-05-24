@@ -3,6 +3,7 @@ import type { CSSProperties, ReactNode } from 'react'
 import { getBackgroundImage } from '../data/backgrounds'
 import { PreviewRow } from './PreviewRow'
 import { useI18n } from '../i18n'
+import { cn } from '../lib/utils'
 
 type BiodataPreviewProps = {
   data: BiodataForm
@@ -59,7 +60,7 @@ export function BiodataPreview({ data, compaction }: BiodataPreviewProps) {
       data-background={data.design.background}
       dir={isRtl ? 'rtl' : 'ltr'}
       className={[
-        'print-area relative mx-auto overflow-hidden rounded-lg border-2 border-[#9F1239] bg-[#fcfdff] text-stone-950 shadow-xl shadow-rose-950/10',
+        'print-area relative mx-auto rounded-lg border-2 border-[#9F1239] bg-[#fcfdff] text-stone-950 shadow-xl shadow-rose-950/10',
         compaction === 'compact' ? 'export-compact' : '',
         compaction === 'ultra-compact' ? 'export-ultra-compact' : '',
       ].join(' ')}
@@ -131,7 +132,7 @@ export function BiodataPreview({ data, compaction }: BiodataPreviewProps) {
         </div>
       </div>
 
-      <div className="relative z-10 space-y-4 px-5 pb-5">
+      <div className="relative z-10 space-y-4 px-5 pb-28">
         <PreviewSection title={t('educationCareer')}>
           <PreviewRow label={t('qualification')} value={data.career.highestQualification} />
           <PreviewRow label={t('college')} value={data.career.collegeName} />
@@ -151,7 +152,7 @@ export function BiodataPreview({ data, compaction }: BiodataPreviewProps) {
           </PreviewSection>
         ) : null}
 
-        <PreviewSection title={t('contactInformation')}>
+        <PreviewSection title={t('contactInformation')} singleColumn>
           <PreviewRow
             label={t('contact')}
             value={phone(data.contact.countryCode, data.contact.phone)}
@@ -262,16 +263,23 @@ function DivineIcon({
 function PreviewSection({
   title,
   children,
+  singleColumn,
 }: {
   title: string
   children: ReactNode
+  singleColumn?: boolean
 }) {
   return (
     <section className="preview-section break-inside-avoid rounded-md p-2">
       <h3 className="mb-2 border-b-2 border-rose-300 pb-1.5 font-serif text-lg font-bold text-[#9F1239]">
         {title}
       </h3>
-      <dl className="preview-details grid grid-cols-1 gap-x-5 sm:grid-cols-2">
+      <dl
+        className={cn(
+          'preview-details grid grid-cols-1 gap-x-5',
+          singleColumn ? 'preview-details-single' : 'sm:grid-cols-2',
+        )}
+      >
         {children}
       </dl>
     </section>

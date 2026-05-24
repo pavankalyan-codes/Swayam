@@ -149,7 +149,10 @@ export function BiodataMaker() {
       return null
     }
 
-    await waitForPreviewAssets()
+    const preview = getPreviewElement()
+    if (preview) {
+      await waitForPreviewAssets(preview)
+    }
     return trimmed
   }
 
@@ -163,17 +166,19 @@ export function BiodataMaker() {
   }
 
   async function capturePreview() {
-    const preview = document.getElementById('biodata-preview')
+    const preview = getPreviewElement()
     if (!preview) throw new Error('Biodata preview was not found.')
 
-    preview.classList.add('export-canvas')
-    const restoreImages = await inlinePreviewImages(preview)
+    const { clone, wrapper, remove } = createExportPreviewClone(preview)
+    document.body.appendChild(wrapper)
+    clone.classList.add('export-canvas')
+    const restoreImages = await inlinePreviewImages(clone)
 
     try {
-      await waitForPreviewAssets()
-      await applyExportFit(preview)
+      await waitForPreviewAssets(clone)
+      await applyExportFit(clone)
 
-      return await toJpeg(preview, {
+      return await toJpeg(clone, {
         cacheBust: true,
         quality: 0.98,
         pixelRatio: 2,
@@ -183,7 +188,7 @@ export function BiodataMaker() {
       })
     } finally {
       restoreImages()
-      preview.classList.remove('export-canvas', 'export-compact', 'export-ultra-compact')
+      remove()
     }
   }
 
@@ -215,13 +220,7 @@ export function BiodataMaker() {
       if (!data) return
 
       const jpeg = await capturePreview()
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-        compress: true,
-      })
-      pdf.addImage(jpeg, 'JPEG', 0, 0, 210, 297, undefined, 'FAST')
+      const pdf = await createPdfFromJpeg(jpeg)
       pdf.save(`${fileBaseName(data)}.pdf`)
       if (typeof window !== 'undefined' && (window as any).gtag) {
         (window as any).gtag('event', 'generate_biodata', {
@@ -240,13 +239,7 @@ export function BiodataMaker() {
       if (!data) return
 
       const jpeg = await capturePreview()
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-        compress: true,
-      })
-      pdf.addImage(jpeg, 'JPEG', 0, 0, 210, 297, undefined, 'FAST')
+      const pdf = await createPdfFromJpeg(jpeg)
 
       const pdfBlob = pdf.output('blob')
       const fileName = `${fileBaseName(data)}.pdf`
@@ -646,11 +639,12 @@ export function BiodataMaker() {
                   title={t('contactInformation')}
                   description={t('contactDescription')}
                 >
-                  <FieldGrid>
+                  <div className="grid gap-x-5 gap-y-5 md:grid-cols-2">
                     <PhoneInput
                       id="phone"
                       label={t('contactNumber')}
                       required
+                      className="md:col-span-2"
                       countryCode={formData.contact.countryCode}
                       phone={formData.contact.phone}
                       error={errors['contact.phone']}
@@ -662,6 +656,7 @@ export function BiodataMaker() {
                       type="email"
                       label={t('emailId')}
                       required
+                      className="md:col-span-2"
                       value={formData.contact.email}
                       error={errors['contact.email']}
                       onChange={(value) => updateField('contact.email', value)}
@@ -688,17 +683,16 @@ export function BiodataMaker() {
                       }
                       onPhoneChange={(value) => updatePhone('contact.motherPhone', value)}
                     />
-                    <div className="sm:col-span-2">
-                      <FormInput
-                        id="address"
-                        label={t('address')}
-                        multiline
-                        value={formData.contact.address}
-                        onChange={(value) => updateField('contact.address', value)}
-                      />
-                    </div>
-                  </FieldGrid>
-                  <p className="mt-4 rounded-md bg-stone-50 px-3 py-2 text-xs leading-5 text-stone-500">
+                    <FormInput
+                      id="address"
+                      label={t('address')}
+                      multiline
+                      className="md:col-span-2"
+                      value={formData.contact.address}
+                      onChange={(value) => updateField('contact.address', value)}
+                    />
+                  </div>
+                  <p className="mt-5 rounded-md bg-stone-50 px-3 py-2.5 text-xs leading-5 text-stone-500">
                     {t('whatsappConsent')}
                   </p>
                 </AccordionSection>
@@ -817,8 +811,8 @@ export function BiodataMaker() {
             </form>
           </section>
 
-          <aside className="xl:sticky xl:top-6 xl:self-start xl:max-h-[calc(100vh-5rem)] overflow-hidden animate-fade-in-up" style={{ animationDelay: '300ms' }}>
-            <div className="preview-container">
+          <aside className="xl:sticky xl:top-6 xl:self-start xl:max-h-[calc(100vh-5rem)] xl:overflow-y-auto rounded-2xl animate-fade-in-up" style={{ animationDelay: '300ms' }}>
+            <div className="preview-container !bg-transparent !p-0">
               <PreviewScaler minScale={0.6}>
                 <BiodataPreview data={formData} compaction={compaction} />
               </PreviewScaler>
@@ -905,6 +899,7 @@ export function BiodataMaker() {
  */
 function PreviewScaler({ children, minScale = 0.5 }: { children: ReactNode; minScale?: number }) {
   const [scale, setScale] = useState(1)
+  const [contentHeight, setContentHeight] = useState(1123)
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -916,6 +911,11 @@ function PreviewScaler({ children, minScale = 0.5 }: { children: ReactNode; minS
       const fitScale = containerWidth / 794
       const newScale = Math.max(minScale, Math.min(1, fitScale))
       setScale(newScale)
+
+      const previewEl = document.getElementById('biodata-preview')
+      if (previewEl) {
+        setContentHeight(previewEl.scrollHeight)
+      }
     }
 
     // Ensure initial scale is correct after layout settles
@@ -923,22 +923,34 @@ function PreviewScaler({ children, minScale = 0.5 }: { children: ReactNode; minS
 
     handleResize()
     window.addEventListener('resize', handleResize)
+
+    const observer = new MutationObserver(handleResize)
+    const previewEl = document.getElementById('biodata-preview')
+    if (previewEl) {
+      observer.observe(previewEl, { childList: true, subtree: true, characterData: true })
+    }
+
     return () => {
       window.removeEventListener('resize', handleResize)
       clearTimeout(timer)
+      observer.disconnect()
     }
-  }, [minScale])
+  }, [minScale, children])
 
   return (
-    <div ref={containerRef} className="w-full flex justify-center overflow-x-visible">
+    <div
+      ref={containerRef}
+      className="relative w-full overflow-hidden"
+      style={{ height: `${contentHeight * scale}px` }}
+    >
       <div 
         style={{ 
-          transform: `scale(${scale})`, 
+          left: '50%',
+          position: 'absolute',
+          top: 0,
+          transform: `translateX(-50%) scale(${scale})`, 
           transformOrigin: 'top center',
           width: '794px',
-          height: `${1123 * scale}px`, // Scale height container to match content
-          marginLeft: scale < 1 ? `calc((${scale} * 794px - 794px) / 2)` : 0,
-          marginRight: scale < 1 ? `calc((${scale} * 794px - 794px) / 2)` : 0,
         }}
       >
         {children}
@@ -950,13 +962,76 @@ function FieldGrid({ children }: { children: ReactNode }) {
   return <div className="grid gap-4 sm:grid-cols-2">{children}</div>
 }
 
-async function waitForPreviewAssets() {
+async function createPdfFromJpeg(jpegDataUrl: string) {
+  const pdf = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4',
+    compress: false,
+  })
+  const imageBytes = await dataUrlToUint8Array(jpegDataUrl)
+
+  pdf.addImage({
+    imageData: imageBytes,
+    format: 'JPEG',
+    x: 0,
+    y: 0,
+    width: 210,
+    height: 297,
+    compression: 'NONE',
+  })
+
+  return pdf
+}
+
+async function dataUrlToUint8Array(dataUrl: string) {
+  const response = await fetch(dataUrl)
+  const buffer = await response.arrayBuffer()
+  return new Uint8Array(buffer)
+}
+
+function getPreviewElement() {
+  const previews = Array.from(document.querySelectorAll<HTMLElement>('#biodata-preview'))
+  return previews.find((preview) => preview.offsetParent !== null) ?? previews[0] ?? null
+}
+
+function createExportPreviewClone(preview: HTMLElement) {
+  const wrapper = document.createElement('div')
+  wrapper.setAttribute('aria-hidden', 'true')
+  Object.assign(wrapper.style, {
+    position: 'fixed',
+    top: '0',
+    left: '0',
+    width: '794px',
+    height: '1123px',
+    overflow: 'hidden',
+    pointerEvents: 'none',
+    transform: 'none',
+    zIndex: '-1',
+  })
+
+  const clone = preview.cloneNode(true) as HTMLElement
+  clone.id = 'biodata-preview-export'
+  Object.assign(clone.style, {
+    margin: '0',
+    transform: 'none',
+  })
+
+  wrapper.appendChild(clone)
+
+  return {
+    clone,
+    wrapper,
+    remove: () => wrapper.remove(),
+  }
+}
+
+async function waitForPreviewAssets(root: ParentNode) {
   if (document.fonts?.ready) {
     await document.fonts.ready
   }
 
-  const preview = document.getElementById('biodata-preview')
-  const images = Array.from(preview?.querySelectorAll('img') ?? [])
+  const images = Array.from(root.querySelectorAll('img'))
 
   await Promise.all(
     images.map(
@@ -1019,7 +1094,7 @@ async function inlinePreviewImages(preview: HTMLElement) {
     }),
   )
 
-  await waitForPreviewAssets()
+  await waitForPreviewAssets(preview)
 
   return () => {
     previousSources.forEach((src, image) => {
