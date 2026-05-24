@@ -26,7 +26,14 @@ function sectionHasValues(values: Array<string>) {
 }
 
 export function BiodataPreview({ data }: BiodataPreviewProps) {
-  const name = fullName(data) || 'Your Name'
+  const hasStarted = Boolean(
+    fullName(data) ||
+      data.personal.dob ||
+      data.career.highestQualification ||
+      data.contact.phone ||
+      data.contact.email,
+  )
+  const name = fullName(data) || ''
   const backgroundImage = getBackgroundImage(data.design.background)
   const textPanelOpacity = Math.min(
     0.9,
@@ -57,6 +64,7 @@ export function BiodataPreview({ data }: BiodataPreviewProps) {
           src={backgroundImage}
           alt=""
           aria-hidden="true"
+          crossOrigin="anonymous"
           className="biodata-background-image"
         />
       ) : null}
@@ -97,7 +105,12 @@ export function BiodataPreview({ data }: BiodataPreviewProps) {
           style={{ borderRadius: `${data.design.photoRadius || '18'}px` }}
         >
           {data.photo ? (
-            <img src={data.photo} alt={`${name} profile`} className="h-full w-full object-cover" />
+            <img
+              src={data.photo}
+              alt={`${name} profile`}
+              crossOrigin="anonymous"
+              className="h-full w-full object-cover"
+            />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-gradient-to-b from-amber-50 to-stone-100 text-center text-sm font-medium text-amber-800">
               Profile
@@ -145,6 +158,17 @@ export function BiodataPreview({ data }: BiodataPreviewProps) {
           <PreviewRow label="Address" value={data.contact.address} />
         </PreviewSection>
       </div>
+
+      {!hasStarted ? (
+        <div className="pointer-events-none absolute inset-x-8 top-[34%] z-10 rounded-lg border border-amber-200 bg-[#fffaf0]/88 px-5 py-4 text-center shadow-sm">
+          <p className="font-serif text-2xl font-bold text-[#8d5d13]">
+            Your biodata preview will appear here
+          </p>
+          <p className="mt-2 text-sm leading-6 text-stone-600">
+            Start with your name or use the sample data to preview a completed design.
+          </p>
+        </div>
+      ) : null}
     </article>
   )
 }

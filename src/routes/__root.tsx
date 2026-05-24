@@ -14,12 +14,12 @@ export const Route = createRootRoute({
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       {
-        title: 'Begin Your Marriage Biodata',
+        title: 'Swayam',
       },
       {
         name: 'description',
         content:
-          'Create a polished marriage biodata with live preview, photo upload, and print-ready PDF export.',
+          'Swayam — Where families begin. Create a polished marriage biodata with live preview, photo upload, and print-ready PDF export.',
       },
     ],
     links: [{ rel: 'stylesheet', href: appCss }],

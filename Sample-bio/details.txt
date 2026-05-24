@@ -1,0 +1,83 @@
+{
+  "personal": {
+    "firstName": "Tathineni Veera Venkata Vara",
+    "lastName": "Prasad",
+    "nickname": "Pellikani Prasad",
+    "gender": "Male",
+    "dob": "1978-11-18",
+    "placeOfBirth": "Visakhapatnam",
+    "timeOfBirth": {
+      "hour": "07",
+      "minute": "45",
+      "meridiem": "AM"
+    },
+    "height": "5 feet 11 inches (180 cm)",
+    "maritalStatus": "Never Married",
+    "religion": "Hindu",
+    "motherTongue": "Telugu",
+    "community": "Telugu Naidu",
+    "diet": "Non-Veg",
+    "complexion": "Wheatish",
+    "livingIn": "India",
+    "state": "Andhra Pradesh",
+    "city": "Visakhapatnam"
+  },
+  "career": {
+    "highestQualification": "B.Com.",
+    "collegeName": "Andhra University",
+    "workSector": "Government",
+    "occupation": "Bank Accountant",
+    "companyName": "Andhra Bank",
+    "annualIncome": "₹9,000 per month"
+  },
+  "family": {
+    "fatherName": "Veera Raghava Rao",
+    "fatherOccupation": "Retired Government Employee",
+    "motherName": "Lakshmi Devi",
+    "motherOccupation": "Homemaker",
+    "siblings": [
+      {
+        "name": "Srinivas Rao",
+        "relation": "Elder Brother",
+        "occupation": "Businessman"
+      }
+    ]
+  },
+  "contact": {
+    "countryCode": "+91",
+    "phone": "9848012345",
+    "email": "prasad.andhrabank@example.com",
+    "address": "Dwaraka Nagar, Visakhapatnam, Andhra Pradesh"
+  },
+  "preferences": {
+    "aboutMe": "Simple, emotional, and family-oriented person with a great sense of humor. Looking for a caring life partner who values relationships and togetherness. Strong believer in marriage and traditional family values.",
+    "hobbies": [
+      "Reading Newspapers",
+      "Temple Visits",
+      "Watching Movies",
+      "Helping Friends",
+      "Listening to Music"
+    ],
+    "partnerPreferences": {
+      "ageRange": "22-28",
+      "preferredLocation": "Andhra Pradesh or Telangana",
+      "education": "Any Graduate",
+      "familyValues": "Traditional"
+    }
+  },
+  "funFacts": {
+    "famousDialogue": "Naa Peru Vara Prasad... Andhra Bank lo job chesthanu.",
+    "knownFor": "Searching for marriage alliances for the past 7 years",
+    "personality": [
+      "Funny",
+      "Kind-hearted",
+      "Protective",
+      "Hopeless Romantic"
+    ]
+  },
+  "photo": "/demo/pellikani-prasad.jpg",
+  "inspiration": {
+    "movie": :contentReference[oaicite:0]{index=0},
+    "character": "Pellikani Prasad played by :contentReference[oaicite:1]{index=1}"
+  }
+}

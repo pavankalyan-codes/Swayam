@@ -1,5 +1,6 @@
 import type { BiodataForm } from '../types/biodata'
 import { getDefaultBackground } from './backgrounds'
+import groomPhoto from '../../Sample-bio/groom.jpg?url'
 
 export const emptyBiodataForm: BiodataForm = {
   personal: {
@@ -55,5 +56,62 @@ export const emptyBiodataForm: BiodataForm = {
     background: getDefaultBackground(),
     photoRadius: '18',
     textPanelOpacity: '36',
+  },
+}
+
+export const sampleBiodataForm: BiodataForm = {
+  personal: {
+    firstName: 'Tathineni Veera Venkata Vara',
+    lastName: 'Prasad',
+    gender: 'Male',
+    dob: '1978-11-18',
+    placeOfBirth: 'Visakhapatnam',
+    timeOfBirth: {
+      hour: '07',
+      minute: '45',
+      meridiem: 'AM',
+    },
+    height: '5 feet 11 inches (180 cm)',
+    maritalStatus: 'Never Married',
+    religion: 'Hindu',
+    motherTongue: 'Telugu',
+    community: 'Telugu Naidu',
+    diet: 'Non-Veg',
+    complexion: 'Wheatish',
+    livingIn: 'India',
+    state: 'Andhra Pradesh',
+    city: 'Visakhapatnam',
+  },
+  career: {
+    highestQualification: 'B.Com.',
+    collegeName: 'Andhra University',
+    workSector: 'Government',
+    occupation: 'Bank Accountant',
+    companyName: 'Andhra Bank',
+    annualIncome: 'Rs. 9,000 per month',
+  },
+  family: {
+    fatherName: 'Veera Raghava Rao',
+    fatherOccupation: 'Retired Government Employee',
+    motherName: 'Lakshmi Devi',
+    motherOccupation: 'Homemaker',
+    siblings: 'Srinivas Rao, elder brother, businessman',
+  },
+  contact: {
+    countryCode: '+91',
+    phone: '9848012345',
+    email: 'pk.prasad@andhrabank.com',
+    fatherCountryCode: '+91',
+    fatherPhone: '',
+    motherCountryCode: '+91',
+    motherPhone: '',
+    address: 'Dwaraka Nagar, Visakhapatnam, Andhra Pradesh',
+  },
+  photo: groomPhoto,
+  design: {
+    borderTheme: 'classic-gold',
+    background: getDefaultBackground(),
+    photoRadius: '18',
+    textPanelOpacity: '46',
   },
 }

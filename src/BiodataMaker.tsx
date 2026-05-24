@@ -1,6 +1,6 @@
 import * as Accordion from '@radix-ui/react-accordion'
 import { useForm } from '@tanstack/react-form'
-import { FileImage, FileText, RotateCcw } from 'lucide-react'
+import { FileImage, FileText, Sparkles, RotateCcw } from 'lucide-react'
 import { toJpeg } from 'html-to-image'
 import jsPDF from 'jspdf'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
@@ -20,7 +20,7 @@ import {
   minuteOptions,
   workSectorOptions,
 } from './data/options'
-import { emptyBiodataForm } from './data/initialForm'
+import { emptyBiodataForm, sampleBiodataForm } from './data/initialForm'
 import type { BiodataForm, FieldErrors } from './types/biodata'
 
 const draftKey = 'marriage-biodata-draft-v1'
@@ -102,6 +102,12 @@ export function BiodataMaker() {
     tanstackForm.reset()
   }
 
+  function useSampleData() {
+    setFormData(sampleBiodataForm)
+    setErrors({})
+    tanstackForm.reset()
+  }
+
   async function prepareExport() {
     const trimmed = trimForm(formData)
     const nextErrors = validateForm(trimmed)
@@ -133,12 +139,25 @@ export function BiodataMaker() {
     const preview = document.getElementById('biodata-preview')
     if (!preview) throw new Error('Biodata preview was not found.')
 
-    return toJpeg(preview, {
-      quality: 0.98,
-      pixelRatio: 2,
-      backgroundColor: '#fffaf0',
-      cacheBust: true,
-    })
+    preview.classList.add('export-canvas')
+    const restoreImages = await inlinePreviewImages(preview)
+
+    try {
+      await waitForPreviewAssets()
+      await applyExportFit(preview)
+
+      return await toJpeg(preview, {
+        cacheBust: true,
+        quality: 0.98,
+        pixelRatio: 2,
+        backgroundColor: '#fffaf0',
+        height: 1123,
+        width: 794,
+      })
+    } finally {
+      restoreImages()
+      preview.classList.remove('export-canvas', 'export-compact', 'export-ultra-compact')
+    }
   }
 
   async function exportJpeg() {
@@ -183,13 +202,12 @@ export function BiodataMaker() {
         <header className="no-print mb-6 flex flex-col gap-4 border-b border-stone-200 pb-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-amber-700">
-              Free biodata maker
             </p>
-            <h1 className="mt-2 text-3xl font-bold tracking-normal text-stone-950 sm:text-4xl">
-              Begin Your Marriage Biodata
+            <h1 className="mt-2 text-3xl font-extrabold tracking-[0.02em] text-stone-950 sm:text-5xl brand-heading">
+              Swayam
             </h1>
-            <p className="mt-3 max-w-2xl text-base text-stone-600">
-              Enter matrimonial details once and watch the A4 biodata preview update live.
+            <p className="mt-3 max-w-2xl brand-tagline">
+              Where families begin.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -200,6 +218,14 @@ export function BiodataMaker() {
             >
               <RotateCcw className="h-4 w-4" />
               Clear Form
+            </button>
+            <button
+              type="button"
+              onClick={useSampleData}
+              className="inline-flex items-center gap-2 rounded-md border border-amber-300 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-900 transition hover:bg-amber-100"
+            >
+              <Sparkles className="h-4 w-4" />
+              Try Sample
             </button>
             <button
               type="button"
@@ -690,7 +716,7 @@ export function BiodataMaker() {
             </form>
           </section>
 
-          <aside className="xl:sticky xl:top-6 xl:self-start">
+          <aside className="xl:sticky xl:top-6 xl:self-start xl:max-h-[calc(100vh-5rem)] xl:overflow-y-auto">
             <BiodataPreview data={formData} />
           </aside>
         </div>
@@ -714,15 +740,116 @@ async function waitForPreviewAssets() {
   await Promise.all(
     images.map(
       (image) =>
-        image.complete ||
-        new Promise<void>((resolve) => {
-          image.addEventListener('load', () => resolve(), { once: true })
-          image.addEventListener('error', () => resolve(), { once: true })
-        }),
+        waitForImage(image).then(() =>
+          image.decode ? image.decode().catch(() => undefined) : undefined,
+        ),
     ),
   )
 
   await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+}
+
+function waitForImage(image: HTMLImageElement) {
+  if (image.complete && image.naturalWidth > 0) return Promise.resolve()
+
+  return new Promise<void>((resolve) => {
+    image.addEventListener('load', () => resolve(), { once: true })
+    image.addEventListener('error', () => resolve(), { once: true })
+  })
+}
+
+async function applyExportFit(preview: HTMLElement) {
+  preview.classList.remove('export-compact', 'export-ultra-compact')
+
+  await nextFrame()
+  if (preview.scrollHeight <= preview.clientHeight) return
+
+  preview.classList.add('export-compact')
+
+  await nextFrame()
+  if (preview.scrollHeight <= preview.clientHeight) return
+
+  preview.classList.add('export-ultra-compact')
+  await nextFrame()
+}
+
+function nextFrame() {
+  return new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+}
+
+async function inlinePreviewImages(preview: HTMLElement) {
+  const images = Array.from(preview.querySelectorAll('img'))
+  const previousSources = new Map<HTMLImageElement, string>()
+  const restorers: Array<() => void> = []
+
+  await Promise.all(
+    images.map(async (image) => {
+      const src = image.currentSrc || image.src
+      if (!src || src.startsWith('data:')) return
+
+      try {
+        const dataUrl = await imageUrlToDataUrl(src)
+        previousSources.set(image, image.src)
+        image.src = dataUrl
+        restorers.push(applyImageFallback(image, dataUrl))
+      } catch {
+        // Keep the original URL if the browser refuses conversion.
+      }
+    }),
+  )
+
+  await waitForPreviewAssets()
+
+  return () => {
+    previousSources.forEach((src, image) => {
+      image.src = src
+    })
+    restorers.forEach((restore) => restore())
+  }
+}
+
+function applyImageFallback(image: HTMLImageElement, dataUrl: string) {
+  const target =
+    image.classList.contains('biodata-background-image') ||
+    image.closest('.photo-frame')
+      ? (image.parentElement as HTMLElement | null)
+      : null
+
+  if (!target) return () => undefined
+
+  const previousBackgroundImage = target.style.backgroundImage
+  const previousBackgroundSize = target.style.backgroundSize
+  const previousBackgroundPosition = target.style.backgroundPosition
+  const previousBackgroundRepeat = target.style.backgroundRepeat
+  const previousOpacity = image.style.opacity
+
+  target.style.backgroundImage = `url(${dataUrl})`
+  target.style.backgroundSize = image.classList.contains('biodata-background-image')
+    ? '100% 100%'
+    : 'cover'
+  target.style.backgroundPosition = 'center'
+  target.style.backgroundRepeat = 'no-repeat'
+  image.style.opacity = '0'
+
+  return () => {
+    target.style.backgroundImage = previousBackgroundImage
+    target.style.backgroundSize = previousBackgroundSize
+    target.style.backgroundPosition = previousBackgroundPosition
+    target.style.backgroundRepeat = previousBackgroundRepeat
+    image.style.opacity = previousOpacity
+  }
+}
+
+async function imageUrlToDataUrl(url: string) {
+  const response = await fetch(url, { cache: 'force-cache' })
+  const blob = await response.blob()
+
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result))
+    reader.onerror = () => reject(reader.error)
+    reader.readAsDataURL(blob)
+  })
 }
 
 function loadDraft(): BiodataForm {

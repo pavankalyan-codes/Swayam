@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Naskh+Arabic:wght@400;600;700&family=Noto+Sans+Bengali:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans+Gujarati:wght@400;600;700&family=Noto+Sans+Gurmukhi:wght@400;600;700&family=Noto+Sans+Kannada:wght@400;600;700&family=Noto+Sans+Malayalam:wght@400;600;700&family=Noto+Sans+Oriya:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Sans+Telugu:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Naskh+Arabic:wght@400;600;700&family=Noto+Sans+Bengali:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans+Gujarati:wght@400;600;700&family=Noto+Sans+Gurmukhi:wght@400;600;700&family=Noto+Sans+Kannada:wght@400;600;700&family=Noto+Sans+Malayalam:wght@400;600;700&family=Noto+Sans+Oriya:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Sans+Telugu:wght@400;600;700&family=Tiro+Devanagari:wght@400;500;700&display=swap');
 @import 'tailwindcss';
 
 :root {
@@ -19,6 +19,10 @@
     sans-serif;
 }
 
+.brand-heading {
+  font-family: 'Tiro Devanagari',serif !important;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -34,6 +38,18 @@ input,
 select,
 textarea {
   font: inherit;
+}
+
+.brand-heading {
+  font-family: 'Noto Sans Devanagari', 'Noto Sans Gujarati', 'Noto Sans Tamil', Inter, system-ui, sans-serif;
+  letter-spacing: 0.02em;
+  font-weight: 800;
+}
+
+.brand-tagline {
+  font-family: 'Noto Sans Devanagari', Inter, system-ui, sans-serif;
+  font-size: 1.1rem;
+  color: #5f5245;
 }
 
 .biodata-border-art,
@@ -73,6 +89,167 @@ textarea {
 
 .print-area[data-background='none'] .preview-title {
   padding-top: 28px;
+}
+
+.print-area.export-canvas {
+  border-radius: 0 !important;
+  height: 1123px !important;
+  max-width: none !important;
+  min-height: 1123px !important;
+  overflow: hidden !important;
+  width: 794px !important;
+}
+
+.print-area.export-canvas .preview-title {
+  padding-top: 88px !important;
+}
+
+.print-area.export-canvas[data-background='none'] .preview-title {
+  padding-top: 24px !important;
+}
+
+.print-area.export-canvas .preview-hero {
+  display: grid !important;
+  gap: 18px !important;
+  grid-template-columns: 1fr 132px !important;
+  padding: 18px !important;
+}
+
+.print-area.export-canvas .preview-details {
+  column-gap: 18px !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.print-area.export-canvas .preview-row {
+  padding-bottom: 5px !important;
+  padding-top: 5px !important;
+}
+
+.print-area.export-canvas h2 {
+  font-size: 26px !important;
+}
+
+.print-area.export-canvas h3 {
+  font-size: 16px !important;
+}
+
+.print-area.export-canvas dt {
+  font-size: 10px !important;
+}
+
+.print-area.export-canvas dd {
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+}
+
+.print-area.export-canvas.export-compact .preview-title {
+  padding-bottom: 0 !important;
+  padding-top: 64px !important;
+}
+
+.print-area.export-canvas.export-compact[data-background='none'] .preview-title {
+  padding-top: 16px !important;
+}
+
+.print-area.export-canvas.export-compact .preview-hero {
+  gap: 12px !important;
+  padding: 12px 16px !important;
+}
+
+.print-area.export-canvas.export-compact .space-y-4 {
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+  row-gap: 10px !important;
+}
+
+.print-area.export-canvas.export-compact .space-y-4 > :not(:last-child) {
+  margin-bottom: 10px !important;
+}
+
+.print-area.export-canvas.export-compact .preview-section {
+  padding: 5px 7px !important;
+}
+
+.print-area.export-canvas.export-compact .preview-row {
+  padding-bottom: 3px !important;
+  padding-top: 3px !important;
+}
+
+.print-area.export-canvas.export-compact .photo-frame {
+  height: 148px !important;
+  width: 118px !important;
+}
+
+.print-area.export-canvas.export-compact h3 {
+  font-size: 14px !important;
+  margin-bottom: 5px !important;
+  padding-bottom: 4px !important;
+}
+
+.print-area.export-canvas.export-compact dt {
+  font-size: 9px !important;
+}
+
+.print-area.export-canvas.export-compact dd {
+  font-size: 11px !important;
+  line-height: 1.25 !important;
+}
+
+.print-area.export-canvas.export-ultra-compact .preview-title {
+  padding-bottom: 0 !important;
+  padding-top: 24px !important;
+}
+
+.print-area.export-canvas.export-ultra-compact .preview-hero {
+  gap: 8px !important;
+  grid-template-columns: 1fr 104px !important;
+  padding: 8px 12px !important;
+}
+
+.print-area.export-canvas.export-ultra-compact .preview-details {
+  column-gap: 10px !important;
+}
+
+.print-area.export-canvas.export-ultra-compact .space-y-4 {
+  padding-bottom: 10px !important;
+  padding-left: 12px !important;
+  padding-right: 12px !important;
+  row-gap: 5px !important;
+}
+
+.print-area.export-canvas.export-ultra-compact .space-y-4 > :not(:last-child) {
+  margin-bottom: 5px !important;
+}
+
+.print-area.export-canvas.export-ultra-compact .preview-section {
+  padding: 3px 6px !important;
+}
+
+.print-area.export-canvas.export-ultra-compact .photo-frame {
+  height: 124px !important;
+  width: 104px !important;
+}
+
+.print-area.export-canvas.export-ultra-compact .preview-row {
+  padding-bottom: 1px !important;
+  padding-top: 1px !important;
+}
+
+.print-area.export-canvas.export-ultra-compact h3 {
+  font-size: 12px !important;
+  margin-bottom: 2px !important;
+  padding-bottom: 2px !important;
+}
+
+.print-area.export-canvas.export-ultra-compact dt {
+  font-size: 8px !important;
+}
+
+.print-area.export-canvas.export-ultra-compact dd {
+  font-size: 10px !important;
+  line-height: 1.14 !important;
+  margin-top: 1px !important;
 }
 
 .biodata-border-art {
